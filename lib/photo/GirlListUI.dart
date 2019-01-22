@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:beauty/funny/FunnyListUI.dart';
+import 'package:beauty/main.dart';
 import 'package:beauty/photo/PhotoDetailUI.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +23,9 @@ class GirlListUI extends StatelessWidget {
                 );
               }).toList(),
             ),
+          ),
+          drawer: new Drawer(
+            child: HomeBuilder.homeDrawer(context),
           ),
           body: new TabBarView(
             children: choices.map((Choice choice) {

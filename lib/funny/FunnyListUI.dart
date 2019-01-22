@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-
+import 'package:beauty/main.dart';
 class FunnyListUI extends StatelessWidget {
 
   @override
@@ -20,6 +20,9 @@ class FunnyListUI extends StatelessWidget {
                 );
               }).toList(),
             ),
+          ),
+          drawer: new Drawer(
+            child: HomeBuilder.homeDrawer(context),
           ),
           body: new TabBarView(
             children: choices.map((Choice choice) {

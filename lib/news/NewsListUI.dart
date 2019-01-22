@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:beauty/main.dart';
+import 'package:beauty/news/NewsDetailUI.dart';
 
 class NewsListUI extends StatefulWidget {
   @override
@@ -11,7 +12,6 @@ class _NewsListState extends State<NewsListUI> {
   _NewsListState();
 
   List<Choice> choices = <Choice>[
-    Choice('推荐', "dy"),
     Choice('头条', "toutiao"),
     Choice('科技', "tech"),
     Choice('汽车', "auto"),
@@ -19,6 +19,7 @@ class _NewsListState extends State<NewsListUI> {
     Choice('体育', "sports"),
     Choice('军事', "war"),
     Choice('娱乐', "ent"),
+    Choice('个性推荐', "dy"),
   ];
 
   @override
@@ -87,7 +88,7 @@ class Choice {
 
   final String title;
   final String type;
-  List list;
+  List list = new List();
 }
 
 class ChoiceCard extends StatefulWidget {
@@ -112,15 +113,13 @@ class _CounterState extends State<ChoiceCard> {
       shrinkWrap: true,
       itemCount: choice.list.length,
       itemBuilder: (BuildContext context, int index) {
-        return buildItem(choice.list[index]);
-//        return new GestureDetector(
-//            child: new Hero(
-//                tag: list[index].hashCode,
-//                child: new Card(child: buildItem(context, list[index]))),
-//            onTap: () {
-//              Navigator.of(context).push(new MaterialPageRoute(
-//                  builder: (context) => new PhotoDetailUI(url: list[index])));
-//            });
+        Map item=choice.list[index];
+        return new GestureDetector(
+            child: buildItem(item),
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (context) => new NewsDetailUI(url: item["link"])));
+            });
       },
       addAutomaticKeepAlives: false,
     );
@@ -132,10 +131,12 @@ class _CounterState extends State<ChoiceCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         new Container(
-          padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+          padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
           child: new Text(
             item["title"],
             textAlign: TextAlign.start,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -143,15 +144,20 @@ class _CounterState extends State<ChoiceCard> {
           ),
         ),
         new Container(
-            padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+            padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
             child: buildContent(item)),
         new Container(
           padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
           child: new Row(
             children: <Widget>[
-              new Text(
-                "热点",
-                style: new TextStyle(color: Colors.red),
+              new Offstage(
+                offstage: item["isTop"] == null,
+                child: new Container(
+                    padding: EdgeInsets.only(right: 10),
+                    child: new Text(
+                      "热点",
+                      style: new TextStyle(color: Colors.red),
+                    )),
               ),
               new Text(
                 item["source"] != null ? item["source"] : "",
@@ -173,42 +179,22 @@ class _CounterState extends State<ChoiceCard> {
 
   Widget buildContent(item) {
     print(item);
+    int imgsrc3gtype = item["imgsrc3gtype"];
+//    if(imgsrc3gtype==1){
     List pic = item["picInfo"];
     if (pic != null && pic.isNotEmpty) {
       Map first = pic.firstWhere((item) => item["url"] != null);
-      if (first != null) return image(pic[0]["url"]);
+      if (first != null) {
+        return image(first["url"]);
+      }
     }
-//      switch (item["type"]) {
-//        case "video":
-//          var played = false;
-//          var controller = VideoPlayerController.network(
-//            item["video"],
-//          );
-//          controller.addListener(() {
-//            if (controller.value.hasError) {
-//              print(controller.value.errorDescription);
-//            }
-//          });
-//          controller.initialize();
-//          controller.setLooping(true);
-//          controller.play();
-//          return new SizedBox(
-//              width: double.infinity,
-//              child: new AspectRatio(
-//                aspectRatio: 1,
-//                child: new VideoPlayer(controller),
-//              ));
-//
-//          break;
-//        case "image":
-//          return image(item["image"]);
-//          break;
-//        case "gif":
-//          return image(item["gif"]);
-//          break;
-//        case "text":
-//          break;
-//      }
+//    }
+    return new Container(
+        padding: EdgeInsets.only(top: 15, bottom: 15),
+        child: new Text(
+          item["digest"] + "...",
+          style: new TextStyle(color: Colors.black87),
+        ));
   }
 
   Widget image(String text) {
