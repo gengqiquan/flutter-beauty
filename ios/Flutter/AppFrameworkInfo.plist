@@ -7,7 +7,10 @@
 	<key>CFBundleIdentifier</key>
 	<string>io.flutter.flutter.app</string>
 	<key>NSAppTransportSecurity</key>
-	<string>NSAllowsArbitraryLoads</string>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>CFBundleName</key>
 	<string>App</string>
 	<key>CFBundleSignature</key>
@@ -24,8 +27,6 @@
 	<string>1.0</string>
 	<key>MinimumOSVersion</key>
 	<string>8.0</string>
-	<key>NSAllowsArbitraryLoads</key>
-	<true/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 </dict>

@@ -2,7 +2,7 @@ import 'package:beauty/funny/FunnyListUI.dart';
 import 'package:beauty/photo/GirlListUI.dart';
 import 'package:beauty/news/NewsListUI.dart';
 import 'package:flutter/material.dart';
-
+import 'package:video_player/video_player.dart';
 class HomeBuilder {
   static Widget homeDrawer(BuildContext context) {
     return new ListView(padding: const EdgeInsets.only(), children: <Widget>[

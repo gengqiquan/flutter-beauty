@@ -3,27 +3,32 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
-class NewsWebPage extends StatefulWidget{
-  String  news_url="https://www.baidu.com/";
+class NewsWebPage extends StatefulWidget {
+  String url = "https://www.baidu.com/";
 
-  NewsWebPage();
+  NewsWebPage({Key key, @required this.url}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState()=>new NewsWebPageState(news_url);
-
+  State<StatefulWidget> createState() => new NewsWebPageState(url);
 }
-class NewsWebPageState extends State<NewsWebPage>{
-  String  news_url;
+
+class NewsWebPageState extends State<NewsWebPage> {
+  String news_url;
+
 //  String title;
   // 标记是否是加载中
   bool loading = true;
+
   // 标记当前页面是否是我们自定义的回调页面
   bool isLoadingCallbackPage = false;
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey();
+
   // URL变化监听器
   StreamSubscription<String> onUrlChanged;
+
   // WebView加载状态变化监听器
   StreamSubscription<WebViewStateChanged> onStateChanged;
+
   // 插件提供的对象，该对象用于WebView的各种操作
   FlutterWebviewPlugin flutterWebViewPlugin = new FlutterWebviewPlugin();
 
@@ -31,20 +36,21 @@ class NewsWebPageState extends State<NewsWebPage>{
 
   @override
   void initState() {
-    onStateChanged = flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state){
+    onStateChanged =
+        flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
       // state.type是一个枚举类型，取值有：WebViewState.shouldStart, WebViewState.startLoad, WebViewState.finishLoad
       switch (state.type) {
         case WebViewState.shouldStart:
-        // 准备加载
+          // 准备加载
           setState(() {
             loading = true;
           });
           break;
         case WebViewState.startLoad:
-        // 开始加载
+          // 开始加载
           break;
         case WebViewState.finishLoad:
-        // 加载完成
+          // 加载完成
           setState(() {
             loading = false;
           });
@@ -56,6 +62,7 @@ class NewsWebPageState extends State<NewsWebPage>{
       }
     });
   }
+
   // 解析WebView中的数据
   void parseResult() {
 //    flutterWebViewPlugin.evalJavascript("get();").then((result) {
@@ -68,7 +75,7 @@ class NewsWebPageState extends State<NewsWebPage>{
   Widget build(BuildContext context) {
     List<Widget> titleContent = [];
     titleContent.add(new Text(
-      "",
+      "新闻详情",
       style: new TextStyle(color: Colors.white),
     ));
     if (loading) {
@@ -79,7 +86,8 @@ class NewsWebPageState extends State<NewsWebPage>{
     // WebviewScaffold是插件提供的组件，用于在页面上显示一个WebView并加载URL
     return new WebviewScaffold(
       key: scaffoldKey,
-      url:news_url, // 登录的URL
+      url: news_url,
+      // 登录的URL
       appBar: new AppBar(
         title: new Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -87,9 +95,36 @@ class NewsWebPageState extends State<NewsWebPage>{
         ),
         iconTheme: new IconThemeData(color: Colors.white),
       ),
-      withZoom: true,  // 允许网页缩放
-      withLocalStorage: true, // 允许LocalStorage
-      withJavascript: true, // 允许执行js代码
+      withZoom: true,
+      // 允许网页缩放
+      withLocalStorage: true,
+      // 允许LocalStorage
+      withJavascript: true,
+      // 允许执行js代码
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                flutterWebViewPlugin.goBack();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward_ios),
+              onPressed: () {
+                flutterWebViewPlugin.goForward();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.autorenew),
+              onPressed: () {
+                flutterWebViewPlugin.reload();
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -103,4 +138,3 @@ class NewsWebPageState extends State<NewsWebPage>{
     super.dispose();
   }
 }
-
