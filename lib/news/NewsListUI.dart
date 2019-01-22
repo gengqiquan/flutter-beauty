@@ -118,7 +118,7 @@ class _CounterState extends State<ChoiceCard> {
             child: buildItem(item),
             onTap: () {
               Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (context) => new NewsDetailUI(url: item["link"])));
+                  builder: (context) => new NewsWebPage()));
             });
       },
       addAutomaticKeepAlives: false,
