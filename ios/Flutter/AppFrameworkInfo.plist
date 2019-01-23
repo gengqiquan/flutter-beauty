@@ -7,10 +7,14 @@
 	<key>CFBundleIdentifier</key>
 	<string>io.flutter.flutter.app</string>
 	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <key>NSExceptionDomains</key>
+        <dict>
+
+        </dict>
+    </dict>
 	<key>CFBundleName</key>
 	<string>App</string>
 	<key>CFBundleSignature</key>

@@ -2,8 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:beauty/main.dart';
-class FunnyListUI extends StatelessWidget {
+import 'package:beauty/funny/FunnyDetailUI.dart';
 
+class FunnyListUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -33,7 +34,6 @@ class FunnyListUI extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class Choice {
@@ -44,18 +44,17 @@ class Choice {
 }
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: '全部',type: 1),
-  const Choice(title: '纯文',type: 2),
-  const Choice(title: '图片',type: 3),
-  const Choice(title: '动图',type: 4),
-  const Choice(title: '视频',type: 5),
+  const Choice(title: '全部', type: 1),
+  const Choice(title: '纯文', type: 2),
+  const Choice(title: '图片', type: 3),
+  const Choice(title: '动图', type: 4),
+  const Choice(title: '视频', type: 5),
 ];
 
 class ChoiceCard extends StatefulWidget {
   const ChoiceCard({Key key, this.choice}) : super(key: key);
 
   final Choice choice;
-
 
   @override
   State<StatefulWidget> createState() => new _CounterState(choice);
@@ -74,8 +73,9 @@ class _CounterState extends State<ChoiceCard> {
     return new ListView.builder(
       shrinkWrap: true,
       itemCount: list.length,
+      physics: ClampingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
-        return buildItem(list[index]);
+        return buildItem(list[index], index);
 //        return new GestureDetector(
 //            child: new Hero(
 //                tag: list[index].hashCode,
@@ -89,7 +89,7 @@ class _CounterState extends State<ChoiceCard> {
     );
   }
 
-  Widget buildItem(item) {
+  Widget buildItem(item, int index) {
     return new Card(
         child: new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,33 +125,60 @@ class _CounterState extends State<ChoiceCard> {
         ),
         new Container(
             padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
-            child: buildContent(item)),
+            child: buildContent(item, index)),
       ],
     ));
   }
 
-  Widget buildContent(item) {
+  VideoPlayerController lastController;
+
+  Widget buildContent(item, int index) {
     print(item);
     switch (item["type"]) {
       case "video":
-        var played = false;
-        var controller = VideoPlayerController.network(
-          item["video"],
-        );
-        controller.addListener(() {
-          if (controller.value.hasError) {
-            print(controller.value.errorDescription);
-          }
-        });
-        controller.initialize();
-        controller.setLooping(true);
-        controller.play();
-        return new SizedBox(
-            width: double.infinity,
-            child: new AspectRatio(
-              aspectRatio: 1,
-              child: new VideoPlayer(controller),
-            ));
+        if (index == 0) {
+          var controller = VideoPlayerController.network(
+            item["video"].toString().replaceAll("http", "https"),
+          );
+          controller.addListener(() {
+            if (controller.value.hasError) {
+              print(controller.value.errorDescription);
+            }
+          });
+          controller.initialize();
+          controller.setLooping(false);
+          controller.play();
+          return new SizedBox(
+              width: double.infinity,
+              child: new AspectRatio(
+                  aspectRatio: 3 / 2, child: VideoPlayer(controller)));
+        } else {
+          return new SizedBox(
+              width: double.infinity,
+              child: new AspectRatio(
+                  aspectRatio: 3 / 2,
+                  child: Stack(children: <Widget>[
+                    new Image.network(
+                      item["thumbnail"],
+                      width: double.infinity,
+                      fit: BoxFit.fill,
+                    ),
+                    new InkWell(
+                      child: new Center(
+                        child: new Image.asset("assets/ic_player.png"),
+                      ),
+                      onTap: () {
+//                        if (lastController != null) {
+//                          lastController.dispose();
+//                        }
+                        Navigator.of(context).push(new MaterialPageRoute(
+                            builder: (context) =>
+                                new FunnyDetailUI(item: item)));
+//                        lastController = controller;
+                      },
+                    ),
+                  ])));
+        }
 
         break;
       case "image":
@@ -199,8 +226,8 @@ class _CounterState extends State<ChoiceCard> {
   void getHttp() async {
     try {
       Response<Map<String, Object>> response;
-      response =
-          await Dio().get("https://www.apiopen.top/satinGodApi?type=${choice.type}&page=1");
+      response = await Dio().get(
+          "https://www.apiopen.top/satinGodApi?type=${choice.type}&page=1");
       if (response.statusCode != 200) {
         return print("response.statusCode" + response.statusCode.toString());
       }

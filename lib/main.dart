@@ -2,7 +2,7 @@ import 'package:beauty/funny/FunnyListUI.dart';
 import 'package:beauty/photo/GirlListUI.dart';
 import 'package:beauty/news/NewsListUI.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+
 class HomeBuilder {
   static Widget homeDrawer(BuildContext context) {
     return new ListView(padding: const EdgeInsets.only(), children: <Widget>[
@@ -40,7 +40,7 @@ class HomeBuilder {
         applicationName: "Beauty",
         applicationVersion: "1.0",
         applicationIcon: new Image.asset(
-          "images/ymj_jiayou.gif",
+          "assets/ic_girl_header.jpeg",
           width: 64.0,
           height: 64.0,
         ),
