@@ -36,7 +36,6 @@ class GirlListUI extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class Choice {
@@ -99,32 +98,37 @@ class _CounterState extends State<ChoiceCard> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new StaggeredGridView.countBuilder(
-      crossAxisCount: 4,
-      shrinkWrap: true,
-      itemCount: imgs.length,
-      itemBuilder: (BuildContext context, int index) {
-        return new GestureDetector(
-            child: new Hero(
-                tag: imgs[index],
-                child: Image.network(
-                  imgs[index],
-                  fit: BoxFit.fitWidth,
-                )),
-            onTap: () {
-              Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (context) => new PhotoDetailUI(url: imgs[index])));
-            });
-      },
-      staggeredTileBuilder: (int index) =>
-          new StaggeredTile.count(2, index.isEven ? 2 : 3),
-      mainAxisSpacing: 4.0,
-      crossAxisSpacing: 4.0,
-      addAutomaticKeepAlives: false,
-    );
+    return new RefreshIndicator(
+        onRefresh:()=>getHttp(),
+        child: new StaggeredGridView.countBuilder(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          itemCount: imgs.length,
+          itemBuilder: (BuildContext context, int index) {
+            return new GestureDetector(
+                child: new Hero(
+                    tag: imgs[index],
+                    child: Image.network(
+                      imgs[index],
+                      fit: BoxFit.fitWidth,
+                    )),
+                onTap: () {
+                  Navigator.of(context).push(new MaterialPageRoute(
+                      builder: (context) => new PhotoDetailUI(
+                            urls: imgs,
+                            index: index,
+                          )));
+                });
+          },
+          staggeredTileBuilder: (int index) =>
+              new StaggeredTile.count(2, index.isEven ? 2 : 3),
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 4.0,
+          addAutomaticKeepAlives: false,
+        ));
   }
 
-  void getHttp() async {
+  Future<Null>  getHttp({bool refresh: true}) async {
     try {
       Response response;
       response = await Dio().get(
@@ -140,7 +144,10 @@ class _CounterState extends State<ChoiceCard> {
       setState(() {
         for (var value in list) {
 //        Map img = JsonCodec().decode(value);
-          imgs.add(value["image_url"]);
+          String url = value["image_url"];
+          if (url != null) {
+            imgs.add(value["image_url"]);
+          }
         }
         count = 10;
       });
@@ -160,4 +167,3 @@ class _CounterState extends State<ChoiceCard> {
   @override
   void deactivate() {}
 }
-

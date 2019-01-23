@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
-class PhotoDetailUI extends StatelessWidget {
-  String url;
+class PhotoDetailUI extends StatefulWidget {
+  PhotoDetailUI({Key key, @required this.urls, this.index: 0})
+      : super(key: key);
+  final List<String> urls;
+  int index;
+
+  @override
+  State<StatefulWidget> createState() => new _PhotoDetailUIState(urls, index);
+}
+
+class _PhotoDetailUIState extends State<PhotoDetailUI> {
+  final List<String> urls;
+  final int index;
+
+  _PhotoDetailUIState(this.urls, this.index);
+
+  var width = MediaQueryData.fromWindow(window).size.width;
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +26,53 @@ class PhotoDetailUI extends StatelessWidget {
         title: const Text('图片详情'),
         iconTheme: new IconThemeData(color: Colors.white),
       ),
-      body: new Hero(
-          tag: url,
-          child: new Image.network(
-            url,
-            fit: BoxFit.scaleDown,
-          )),
+      body: new Container(
+        child: new Hero(
+            tag: urls[index],
+            child: new PageView(
+              controller: controller,
+              children: urls.map((url) => getImg(url)).toList(),
+            )),
+      ),
     );
   }
 
-  PhotoDetailUI({Key key, @required this.url}) : super(key: key);
+  PageController controller;
+  var pageOffset = 0.0;
+  var forward = true;
+  var lastOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = new PageController(initialPage: index);
+//    lastOffset = controller.offset;
+    controller.addListener(() {
+      setState(() {
+        forward = controller.offset > lastOffset;
+        pageOffset = controller.offset / width;
+      });
+    });
+  }
+
+  Widget getImg(String url) {
+    var currentLeftPageIndex = pageOffset.floor();
+    var currentPageOffsetPercent = pageOffset - currentLeftPageIndex;
+
+    var position = urls.indexOf(url);
+    return Transform.translate(
+      offset: Offset((pageOffset - position) * width, 0),
+      child: Transform.scale(
+        scale: currentLeftPageIndex == position
+            ? 1 - currentPageOffsetPercent
+            : currentPageOffsetPercent,
+        child: Image.network(url,fit:  BoxFit.scaleDown,),
+      ),
+    );
+//    return new Image.network(
+//      url,
+//      fit: BoxFit.scaleDown,
+//    );
+  }
 }
