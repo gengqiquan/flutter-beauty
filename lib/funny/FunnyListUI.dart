@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:beauty/main.dart';
+import 'dart:ui';
 import 'package:beauty/funny/FunnyDetailUI.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class FunnyListUI extends StatelessWidget {
   @override
@@ -91,43 +93,116 @@ class _CounterState extends State<ChoiceCard> {
 
   Widget buildItem(item, int index) {
     return new Card(
-        child: new Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        new Container(
-          padding: EdgeInsets.all(15),
-          child: new Row(
-            children: <Widget>[
-              new SizedBox(
-                width: 30,
-                height: 30,
-                child: new ClipOval(
-                  child: Image.network(item["header"]),
+        child: new InkWell(
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Container(
+            padding: EdgeInsets.all(15),
+            child: new Row(
+              children: <Widget>[
+                new SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: new ClipOval(
+                    child: Image.network(item["header"]),
+                  ),
                 ),
+                new Container(
+                  width: 15,
+                ),
+                new Text(
+                  item["username"],
+                  style: new TextStyle(
+                      color: Colors.black54, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          new Container(
+            padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+            child: new Text(
+              item["text"],
+              textAlign: TextAlign.start,
+            ),
+          ),
+          new Container(
+              padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+              child: buildContent(item, index)),
+          new Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new Container(
+                width: 15,
+              ),
+              new Icon(Icons.sentiment_satisfied,
+                  color: Colors.grey, size: 20.0),
+              new Text(
+                " " + item["up"].toString(),
+                style: new TextStyle(color: Colors.grey),
               ),
               new Container(
                 width: 15,
               ),
+              new Icon(Icons.sentiment_dissatisfied,
+                  color: Colors.grey, size: 20.0),
               new Text(
-                item["username"],
-                style: new TextStyle(
-                    color: Colors.black54, fontWeight: FontWeight.w600),
+                " " + item["down"].toString(),
+                style: new TextStyle(color: Colors.grey),
+              ),
+              new Flexible(
+                child: Container(),
+                flex: 1,
+              ),
+              new Icon(Icons.sms, color: Colors.grey, size: 20.0),
+              new Text(
+                " " + item["comment"].toString(),
+                style: new TextStyle(color: Colors.grey),
+              ),
+              new Container(
+                width: 15,
+              ),
+              new Icon(Icons.share, color: Colors.grey, size: 20.0),
+              new Text(
+                " " + item["forward"].toString(),
+                style: new TextStyle(color: Colors.grey),
+              ),
+              new Container(
+                width: 15,
               ),
             ],
           ),
-        ),
-        new Container(
-          padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
-          child: new Text(
-            item["text"],
-            textAlign: TextAlign.start,
+          new Container(
+            height: 15,
           ),
-        ),
-        new Container(
-            padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
-            child: buildContent(item, index)),
-      ],
+          buildHotComment(item)
+        ],
+      ),
+      onTap: () {
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (context) => new FunnyDetailUI(item: item)));
+      },
     ));
+  }
+
+  Widget buildHotComment(item) {
+    if (item["top_commentsName"] != null) {
+      return new Container(
+          padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+          child: new Text.rich(new TextSpan(children: <TextSpan>[
+            new TextSpan(
+              text: item["top_commentsName"] + "：",
+              style: TextStyle(
+                color: Color(0xff999999),
+              ),
+            ),
+            new TextSpan(
+              text: item["top_commentsContent"],
+              style: TextStyle(color: Colors.black),
+            ),
+          ])));
+    }
+    return new Container();
   }
 
   VideoPlayerController lastController;
@@ -136,56 +211,86 @@ class _CounterState extends State<ChoiceCard> {
     print(item);
     switch (item["type"]) {
       case "video":
-        if (index == 0) {
-          var controller = VideoPlayerController.network(
-            item["video"].toString().replaceAll("http", "https"),
-          );
-          controller.addListener(() {
-            if (controller.value.hasError) {
-              print(controller.value.errorDescription);
-            }
-          });
-          controller.initialize();
-          controller.setLooping(false);
-          controller.play();
-          return new SizedBox(
-              width: double.infinity,
-              child: new AspectRatio(
-                  aspectRatio: 3 / 2, child: VideoPlayer(controller)));
-        } else {
-          return new SizedBox(
-              width: double.infinity,
-              child: new AspectRatio(
-                  aspectRatio: 3 / 2,
-                  child: Stack(children: <Widget>[
-                    new Image.network(
-                      item["thumbnail"],
+//        if (index == 0) {
+//          return new SizedBox(
+//              width: double.infinity,
+//              child: new AspectRatio(
+//                  aspectRatio: 3 / 2,
+//                  child: new Stack(children: <Widget>[
+//                    new Image.network(
+//                      item["thumbnail"],
+//                      width: double.infinity,
+//                      fit: BoxFit.fill,
+//                    ),
+//                    NetworkPlayerLifeCycle(
+//                      item["video"].toString().replaceAll("http", "https"),
+//                      false,
+//                      (BuildContext context,
+//                              VideoPlayerController controller) =>
+//                          AspectRatioVideo(controller),
+//                    )
+//                  ])));
+//        } else {
+        return new SizedBox(
+            width: double.infinity,
+            child: new AspectRatio(
+                aspectRatio: 3 / 2,
+                child: Stack(children: <Widget>[
+                  new Image.network(
+                    item["thumbnail"],
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                  ),
+                  BackdropFilter(
+                    filter: new ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: new Container(
+                      color: Colors.white.withOpacity(0.1),
                       width: double.infinity,
-                      fit: BoxFit.fill,
+                      height: double.infinity,
                     ),
-                    new InkWell(
-                      child: new Center(
-                        child: new Image.asset("assets/ic_player.png"),
-                      ),
-                      onTap: () {
-//                        if (lastController != null) {
-//                          lastController.dispose();
-//                        }
-                        Navigator.of(context).push(new MaterialPageRoute(
-                            builder: (context) =>
-                                new FunnyDetailUI(item: item)));
-//                        lastController = controller;
-                      },
+                  ),
+                  new Image.network(
+                    item["thumbnail"],
+                    width: double.infinity,
+                    fit: BoxFit.scaleDown,
+                  ),
+                  new InkWell(
+                    child: new Center(
+                      child: new Image.asset("assets/ic_player.png"),
                     ),
-                  ])));
-        }
-
+                  ),
+                ])));
+//        }
         break;
       case "image":
         return image(item["image"]);
         break;
       case "gif":
-        return image(item["gif"]);
+        return new SizedBox(
+            width: double.infinity,
+            child: new AspectRatio(
+                aspectRatio: 3/2,
+                child: new Stack(children: <Widget>[
+                  new FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: item["thumbnail"],
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                  ),
+                  BackdropFilter(
+                    filter: new ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: new Container(
+                      color: Colors.white.withOpacity(0.1),
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                  new Image.network(
+                    item["gif"],
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ])));
         break;
       case "text":
         break;

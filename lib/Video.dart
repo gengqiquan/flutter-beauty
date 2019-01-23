@@ -68,11 +68,13 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
       ),
       Align(
         alignment: Alignment.bottomCenter,
-        child: VideoProgressIndicator(
+        child: new SizedBox(height: 3,child:VideoProgressIndicator(
           controller,
+          padding: EdgeInsets.all(0),
           allowScrubbing: true,
+          colors: new VideoProgressColors(playedColor: Colors.amberAccent),
         ),
-      ),
+      )),
       Center(child: imageFadeAnim),
       Center(
           child: controller.value.isBuffering
@@ -159,25 +161,34 @@ abstract class PlayerLifeCycle extends StatefulWidget {
 /// A widget connecting its life cycle to a [VideoPlayerController] using
 /// a data source from the network.
 class NetworkPlayerLifeCycle extends PlayerLifeCycle {
-  NetworkPlayerLifeCycle(String dataSource, VideoWidgetBuilder childBuilder)
+  NetworkPlayerLifeCycle(
+      String dataSource, this.autoPlay, VideoWidgetBuilder childBuilder)
       : super(dataSource, childBuilder);
+  final bool autoPlay;
 
   @override
-  _NetworkPlayerLifeCycleState createState() => _NetworkPlayerLifeCycleState();
+  _NetworkPlayerLifeCycleState createState() =>
+      _NetworkPlayerLifeCycleState(autoPlay);
 }
 
 /// A widget connecting its life cycle to a [VideoPlayerController] using
 /// an asset as data source
 class AssetPlayerLifeCycle extends PlayerLifeCycle {
-  AssetPlayerLifeCycle(String dataSource, VideoWidgetBuilder childBuilder)
+  AssetPlayerLifeCycle(
+      String dataSource, this.autoPlay, VideoWidgetBuilder childBuilder)
       : super(dataSource, childBuilder);
+  final bool autoPlay;
 
   @override
-  _AssetPlayerLifeCycleState createState() => _AssetPlayerLifeCycleState();
+  _AssetPlayerLifeCycleState createState() =>
+      _AssetPlayerLifeCycleState(autoPlay);
 }
 
 abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
   VideoPlayerController controller;
+  final bool autoPlay;
+
+  _PlayerLifeCycleState(this.autoPlay);
 
   @override
 
@@ -216,6 +227,8 @@ abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
 }
 
 class _NetworkPlayerLifeCycleState extends _PlayerLifeCycleState {
+  _NetworkPlayerLifeCycleState(bool autoPlay) : super(autoPlay);
+
   @override
   VideoPlayerController createVideoPlayerController() {
     return VideoPlayerController.network(widget.dataSource);
@@ -223,12 +236,13 @@ class _NetworkPlayerLifeCycleState extends _PlayerLifeCycleState {
 }
 
 class _AssetPlayerLifeCycleState extends _PlayerLifeCycleState {
+  _AssetPlayerLifeCycleState(bool autoPlay) : super(autoPlay);
+
   @override
   VideoPlayerController createVideoPlayerController() {
     return VideoPlayerController.asset(widget.dataSource);
   }
 }
-
 
 class AspectRatioVideo extends StatefulWidget {
   AspectRatioVideo(this.controller);
@@ -284,10 +298,11 @@ void main() {
           title: const Text('Video player example'),
         ),
         body: NetworkPlayerLifeCycle(
-              'https://wvideo.spriteapp.cn/video/2018/0511/5af5a56ebeb80_wpd.mp4',
-              (BuildContext context, VideoPlayerController controller) =>
-                  AspectRatioVideo(controller),
-            ),
+          'https://wvideo.spriteapp.cn/video/2018/0511/5af5a56ebeb80_wpd.mp4',
+          false,
+          (BuildContext context, VideoPlayerController controller) =>
+              AspectRatioVideo(controller),
+        ),
 
 //              NetworkPlayerLifeCycle(
 //                'http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_20mb.mp4',
