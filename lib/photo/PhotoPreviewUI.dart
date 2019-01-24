@@ -15,8 +15,9 @@ class PhotoPreviewUI extends StatelessWidget {
         backgroundColor: Colors.transparent,
         iconTheme: new IconThemeData(color: Colors.white),
       ),
-      body: new Container(
+      body: new Center(
         child: new DragScaleView(
+          upperLimit: 3,
             child: new Hero(
           tag: url,
           child: Image.network(

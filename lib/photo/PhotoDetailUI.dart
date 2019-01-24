@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:beauty/photo/PhotoPreviewUI.dart';
+
 class PhotoDetailUI extends StatefulWidget {
   PhotoDetailUI({Key key, @required this.urls, this.index: 0})
       : super(key: key);
@@ -45,9 +46,8 @@ class _PhotoDetailUIState extends State<PhotoDetailUI> {
   @override
   void initState() {
     super.initState();
-
+    pageOffset = index * 1.0;
     controller = new PageController(initialPage: index);
-//    lastOffset = controller.offset;
     controller.addListener(() {
       setState(() {
         forward = controller.offset > lastOffset;
@@ -57,7 +57,6 @@ class _PhotoDetailUIState extends State<PhotoDetailUI> {
   }
 
   Widget getImg(String url) {
-
     var currentLeftPageIndex = pageOffset.floor();
     var currentPageOffsetPercent = pageOffset - currentLeftPageIndex;
 
@@ -68,14 +67,17 @@ class _PhotoDetailUIState extends State<PhotoDetailUI> {
         scale: currentLeftPageIndex == position
             ? 1 - currentPageOffsetPercent
             : currentPageOffsetPercent,
-                child: InkWell(
+        child: GestureDetector(
             onTap: () {
               Navigator.of(context).push(new MaterialPageRoute(
                   builder: (context) => new PhotoPreviewUI(
                         url: url,
                       )));
             },
-        child: Image.network(url,fit:  BoxFit.scaleDown,)),
+            child: Image.network(
+              url,
+              fit: BoxFit.scaleDown,
+            )),
       ),
     );
 //    return new Image.network(
