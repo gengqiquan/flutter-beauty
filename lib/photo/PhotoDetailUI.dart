@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-
+import 'package:beauty/photo/PhotoPreviewUI.dart';
 class PhotoDetailUI extends StatefulWidget {
   PhotoDetailUI({Key key, @required this.urls, this.index: 0})
       : super(key: key);
@@ -57,6 +57,7 @@ class _PhotoDetailUIState extends State<PhotoDetailUI> {
   }
 
   Widget getImg(String url) {
+
     var currentLeftPageIndex = pageOffset.floor();
     var currentPageOffsetPercent = pageOffset - currentLeftPageIndex;
 
@@ -67,7 +68,14 @@ class _PhotoDetailUIState extends State<PhotoDetailUI> {
         scale: currentLeftPageIndex == position
             ? 1 - currentPageOffsetPercent
             : currentPageOffsetPercent,
-        child: Image.network(url,fit:  BoxFit.scaleDown,),
+                child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (context) => new PhotoPreviewUI(
+                        url: url,
+                      )));
+            },
+        child: Image.network(url,fit:  BoxFit.scaleDown,)),
       ),
     );
 //    return new Image.network(

@@ -72,12 +72,14 @@ class _CounterState extends State<ChoiceCard> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new ListView.builder(
-      shrinkWrap: true,
-      itemCount: list.length,
-      physics: ClampingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return buildItem(list[index], index);
+    return new RefreshIndicator(
+        onRefresh: () => getHttp(),
+        child: new ListView.builder(
+          shrinkWrap: true,
+          itemCount: list.length,
+          physics: ClampingScrollPhysics(),
+          itemBuilder: (BuildContext context, int index) {
+            return buildItem(list[index], index);
 //        return new GestureDetector(
 //            child: new Hero(
 //                tag: list[index].hashCode,
@@ -86,9 +88,9 @@ class _CounterState extends State<ChoiceCard> {
 //              Navigator.of(context).push(new MaterialPageRoute(
 //                  builder: (context) => new PhotoDetailUI(url: list[index])));
 //            });
-      },
-      addAutomaticKeepAlives: false,
-    );
+          },
+          addAutomaticKeepAlives: false,
+        ));
   }
 
   Widget buildItem(item, int index) {
@@ -269,7 +271,7 @@ class _CounterState extends State<ChoiceCard> {
         return new SizedBox(
             width: double.infinity,
             child: new AspectRatio(
-                aspectRatio: 3/2,
+                aspectRatio: 3 / 2,
                 child: new Stack(children: <Widget>[
                   new FadeInImage.memoryNetwork(
                     placeholder: kTransparentImage,
@@ -328,7 +330,7 @@ class _CounterState extends State<ChoiceCard> {
     );
   }
 
-  void getHttp() async {
+  Future<Null> getHttp() async {
     try {
       Response<Map<String, Object>> response;
       response = await Dio().get(

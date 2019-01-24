@@ -1,4 +1,5 @@
 import 'package:beauty/funny/FunnyListUI.dart';
+import 'package:beauty/funny/JokeUI.dart';
 import 'package:beauty/photo/GirlListUI.dart';
 import 'package:beauty/news/NewsListUI.dart';
 import 'package:flutter/material.dart';
