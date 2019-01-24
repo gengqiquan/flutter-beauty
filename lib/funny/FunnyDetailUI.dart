@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:beauty/main.dart';
 import 'package:beauty/Video.dart';
 import 'dart:ui';
+import 'package:beauty/photo/PhotoPreviewUI.dart';
 
 class FunnyDetailUI extends StatelessWidget {
   Map item;
@@ -69,7 +69,7 @@ class FunnyDetailUI extends StatelessWidget {
                     child: new Stack(
                       children: <Widget>[
                         new AspectRatio(aspectRatio: 3 / 2),
-                        buildContent(item)
+                        buildContent(context, item)
                       ],
                     )),
                 new Container(
@@ -159,7 +159,7 @@ class FunnyDetailUI extends StatelessWidget {
     ));
   }
 
-  Widget buildContent(item) {
+  Widget buildContent(BuildContext context, item) {
     print(item);
     switch (item["type"]) {
       case "video":
@@ -170,51 +170,34 @@ class FunnyDetailUI extends StatelessWidget {
               true,
               (BuildContext context, VideoPlayerController controller) =>
                   AspectRatioVideo(controller),
-            ));//        } else {
+            )); //        } else {
 
-//          return new SizedBox(
-//              width: double.infinity,
-//              child: new AspectRatio(
-//                  aspectRatio: 3 / 2,
-//                  child: Stack(children: <Widget>[
-//                    new Image.network(
-//                      item["thumbnail"],
-//                      width: double.infinity,
-//                      fit: BoxFit.fill,
-//                    ),
-//                    new InkWell(
-//                      child: new Center(
-//                        child: new Image.asset("assets/ic_player.png"),
-//                      ),
-//                      onTap: () {
-////                        if (lastController != null) {
-////                          lastController.dispose();
-////                        }
-//                        controller.play();
-////                        lastController = controller;
-//                      },
-//                    ),
-//                  ])));
-//        }
 
         break;
       case "image":
-        return image(item["image"]);
+        return image(context, item["image"]);
         break;
       case "gif":
-        return image(item["gif"]);
+        return image(context, item["gif"]);
         break;
       case "text":
         break;
     }
   }
 
-  Widget image(String text) {
-    return new Image.network(
-      text,
-      width: double.infinity,
-      fit: BoxFit.fitWidth,
-    );
+  Widget image(BuildContext context, String url) {
+    return new GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(new MaterialPageRoute(
+              builder: (context) => new PhotoPreviewUI(
+                    url: url,
+                  )));
+        },
+        child: new Image.network(
+          url,
+          width: double.infinity,
+          fit: BoxFit.fitWidth,
+        ));
   }
 }
 
