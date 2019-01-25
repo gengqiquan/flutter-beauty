@@ -11,12 +11,12 @@ class SeekBar extends StatefulWidget {
   /// The minimum value of the SeekBar.
   ///
   /// Defaults to 0.0 .
-  final double min;
+  final int min;
 
   /// The maximum value of the SeekBar.
   ///
   /// Defaults to 10.0 .
-  final double max;
+  final int max;
 
   /// The step by which the SeekBar's value is incremented.
   ///
@@ -26,7 +26,7 @@ class SeekBar extends StatefulWidget {
   /// The initial value of the SeekBar.
   ///
   /// Defaults to [min] - [step].
-  final double value;
+  final int value;
 
   /// The initial value of the seek radius.
   ///
@@ -59,12 +59,12 @@ class SeekBar extends StatefulWidget {
     @required this.height,
     @required this.width,
     this.onValueChanged,
-    this.max = 100.0,
-    this.min = 0.0,
+    this.max:100,
+    this.min:0,
     this.radius,
 //    this.step,
 //    this.accuracy,
-    this.value = 0,
+    this.value:0,
     this.bar,
     this.seek,
   }) : super(key: key);
