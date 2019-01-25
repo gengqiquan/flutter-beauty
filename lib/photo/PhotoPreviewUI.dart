@@ -19,7 +19,7 @@ class PhotoPreviewUI extends StatelessWidget {
                   url,
                   height: double.infinity,
                   width: double.infinity,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.scaleDown,
                 ),
               )),
         ),

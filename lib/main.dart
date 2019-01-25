@@ -2,6 +2,7 @@ import 'package:beauty/funny/FunnyListUI.dart';
 import 'package:beauty/funny/JokeUI.dart';
 import 'package:beauty/photo/GirlListUI.dart';
 import 'package:beauty/news/NewsListUI.dart';
+import 'package:beauty/music/MusicMainUI.dart';
 import 'package:flutter/material.dart';
 
 class HomeBuilder {
@@ -92,7 +93,7 @@ class MyApp extends StatelessWidget {
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: new GirlListUI(),
+      home: new MusicMainUI(),
     );
   }
 }

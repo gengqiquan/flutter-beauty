@@ -25,6 +25,7 @@ dependencies:
   video_player: "^0.8.0"
   flutter_webview_plugin: "^0.3.0+2"
   transparent_image: ^0.1.0
+  audioplayers: ^0.8.0
 
 
 dev_dependencies:
