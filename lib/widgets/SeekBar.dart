@@ -26,7 +26,7 @@ class SeekBar extends StatefulWidget {
   /// The initial value of the SeekBar.
   ///
   /// Defaults to [min] - [step].
-  final int value;
+  int value;
 
   /// The initial value of the seek radius.
   ///
@@ -44,6 +44,11 @@ class SeekBar extends StatefulWidget {
   /// Use this to change the appearance of the SeekBar. Defaults to h a grey [Container].
   final Widget bar;
 
+  /// The child [Widget] of the fixed [SizedBox].
+  ///
+  /// Use this to change the appearance of the SeekBar. Defaults to h a red [Container].
+  final Widget progress;
+
   /// The child [Widget] of the moving [SizedBox].
   ///
   /// Use this to change the appearance of the SeekBar. Defaults to a
@@ -54,18 +59,19 @@ class SeekBar extends StatefulWidget {
   /// Passes the new value as a parameter.
   final void Function(double) onValueChanged;
 
-  const SeekBar({
+  SeekBar({
     Key key,
     @required this.height,
     @required this.width,
     this.onValueChanged,
-    this.max:100,
-    this.min:0,
+    this.max: 100,
+    this.min: 0,
     this.radius,
 //    this.step,
 //    this.accuracy,
-    this.value:0,
+    this.value: 0,
     this.bar,
+    this.progress,
     this.seek,
   }) : super(key: key);
 
@@ -74,7 +80,6 @@ class SeekBar extends StatefulWidget {
 
 class _SeekBarState extends State<SeekBar> {
   double _length;
-  double _current = 0.0;
   double radius;
   Widget seek;
   Widget bar;
@@ -87,17 +92,35 @@ class _SeekBarState extends State<SeekBar> {
     radius = widget.radius ?? (isHorizontal ? widget.height : widget.width);
 
     _length = isHorizontal ? widget.width : widget.height;
-    _current = _convertLength();
   }
 
-  double _convertLength() {
+  double _convertLength(int value) {
     return (widget.value - widget.min) * _length / (widget.max - widget.min) -
         radius;
   }
 
-  double _getNewValue() {
-    return (_current + radius) * (widget.max - widget.min) / _length +
+  double _convertValue(double current) {
+    return (current + radius) * (widget.max - widget.min) / _length +
         widget.min;
+  }
+
+  void updateValue(double delta) {
+    setState(() {
+      var _current = _convertLength(widget.value);
+      var now = _current + delta;
+      if (now > _length - radius) {
+        now = _length - radius;
+      }
+      if (now < -radius) {
+        now = -radius;
+      }
+      if (_current != now) {
+        var newVlaue = _convertValue(now).floor();
+        widget.value = newVlaue;
+        print("newVlaue:" + newVlaue.toString());
+        widget.onValueChanged ?? (newVlaue);
+      }
+    });
   }
 
   @override
@@ -108,41 +131,13 @@ class _SeekBarState extends State<SeekBar> {
         if (!isHorizontal) {
           return;
         }
-        setState(() {
-          var now = _current + dragDetails.delta.dx;
-          if (now > _length - radius) {
-            now = _length - radius;
-          }
-          if (now < -radius) {
-            now = -radius;
-          }
-          if (_current != now) {
-            _current = now;
-            var newVlaue = _getNewValue();
-            print("newVlaue:" + newVlaue.toString());
-            widget.onValueChanged ?? (newVlaue);
-          }
-        });
+        updateValue(dragDetails.delta.dx);
       },
       onVerticalDragUpdate: (dragDetails) {
         if (isHorizontal) {
           return;
         }
-        setState(() {
-          var now = _current + dragDetails.delta.dy;
-          if (now > _length - radius) {
-            now = _length - radius;
-          }
-          if (now < -radius) {
-            now = -radius;
-          }
-          if (_current != now) {
-            _current = now;
-            var newVlaue = _getNewValue();
-            print("newVlaue:" + newVlaue.toString());
-            widget.onValueChanged ?? (newVlaue);
-          }
-        });
+        updateValue(dragDetails.delta.dy);
       },
       child: Stack(
         alignment: isHorizontal
@@ -150,9 +145,10 @@ class _SeekBarState extends State<SeekBar> {
             : AlignmentDirectional.topCenter,
         children: <Widget>[
           _buildBar(),
+          _buildProgress(),
           new Transform.translate(
-            offset: Offset(
-                isHorizontal ? _current : 0, isHorizontal ? 0 : _current),
+            offset: Offset(isHorizontal ? _convertLength(widget.value) : 0,
+                isHorizontal ? 0 : _convertLength(widget.value)),
             child: _buildSeek(),
           ),
         ],
@@ -180,6 +176,19 @@ class _SeekBarState extends State<SeekBar> {
       child: widget.bar ??
           new Container(
             color: Colors.grey,
+          ),
+    );
+  }
+
+  _buildProgress() {
+    return new SizedBox(
+      width:
+          isHorizontal ? _convertLength(widget.value) + radius : widget.width,
+      height:
+          isHorizontal ? widget.height : _convertLength(widget.value) + radius,
+      child: widget.progress ??
+          new Container(
+            color: Colors.red,
           ),
     );
   }
