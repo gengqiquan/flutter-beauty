@@ -2,15 +2,18 @@ import 'package:beauty/photo/PhotoDetailUI.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'MusicDetailUI.dart';
+import 'package:beauty/main.dart';
 
 class MusicMainUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return new MaterialApp(
         home: new Scaffold(
       appBar: new AppBar(
         title: const Text("音乐"),
+      ),
+      drawer: new Drawer(
+        child: HomeBuilder.homeDrawer(context),
       ),
       body: MusicList(),
     ));
@@ -36,63 +39,61 @@ class _MusicListState extends State<MusicList> {
           itemCount: list.length,
           itemBuilder: (BuildContext context, int index) {
             Map item = list[index];
-            return new GestureDetector(
-                child: new Hero(
-                    tag: item["url"],
-                    child: new Container(
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      margin: EdgeInsets.only(bottom: 15),
-                      child: new SizedBox(
-                        height: 100,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            new AspectRatio(
-                              aspectRatio: 1,
+            return new InkWell(
+                child: new Container(
+                  padding: EdgeInsets.only(left: 15, right: 15),
+                  margin: EdgeInsets.only(bottom: 15),
+                  child: new SizedBox(
+                    height: 100,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new AspectRatio(
+                            aspectRatio: 1,
+                            child: new Hero(
+                              tag: item["url"],
                               child: new Image.network(
                                 item["pic"],
                                 fit: BoxFit.fitWidth,
                               ),
-                            ),
-                            new Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-//                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                new Text(
-                                  item["name"],
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 18),
-                                ),
-                                new Container(
-                                  height: 10,
-                                ),
-                                new Text(
-                                  item["time"].toString(),
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 14),
-                                ),
-                                new Flexible(
-                                  child: new Container(),
-                                  flex: 1,
-                                ),
-                                new Text(
-                                  item["singer"],
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w300,
-                                      fontSize: 15),
-                                ),
-                              ],
-                            )
-                          ],
+                            )),
+                        new Container(
+                          width: 15,
                         ),
-                      ),
-                    )),
+                        new Flexible(
+                          flex: 1,
+                          child: new Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+//                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              new Text(
+                                item["name"],
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18),
+                              ),
+                              new Container(
+                                height: 10,
+                              ),
+                              new Text(
+                                item["singer"],
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 15),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
                 onTap: () {
                   Navigator.of(context).push(new MaterialPageRoute(
-                      builder: (context) => new MusicDetailUI(info: item)));
+                      builder: (context) =>
+                          new MusicDetailUI(list: list, index: index)));
                 });
           },
           addAutomaticKeepAlives: false,

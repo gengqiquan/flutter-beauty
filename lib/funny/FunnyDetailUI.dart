@@ -142,8 +142,8 @@ class FunnyDetailUI extends StatelessWidget {
             ),
         new InkWell(
           child: new Container(
-            margin: EdgeInsets.fromLTRB(
-                15, MediaQueryData.fromWindow(window).padding.top, 0, 0),
+            margin: EdgeInsets.only(
+                top: MediaQueryData.fromWindow(window).padding.top),
             height: 48,
             width: 48,
             child: new Icon(
@@ -171,7 +171,6 @@ class FunnyDetailUI extends StatelessWidget {
               (BuildContext context, VideoPlayerController controller) =>
                   AspectRatioVideo(controller),
             )); //        } else {
-
 
         break;
       case "image":
