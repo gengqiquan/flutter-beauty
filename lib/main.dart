@@ -18,7 +18,8 @@ class HomeBuilder {
                 new MaterialPageRoute(builder: (context) => new NewsListUI()));
           },
         ),
-      ),   new ClipRect(
+      ),
+      new ClipRect(
         child: new ListTile(
           leading: new CircleAvatar(child: new Icon(Icons.photo)),
           title: new Text('福利'),
@@ -34,6 +35,14 @@ class HomeBuilder {
         onTap: () {
           Navigator.of(context).push(
               new MaterialPageRoute(builder: (context) => new FunnyListUI()));
+        },
+      ),
+      new ListTile(
+        leading: new CircleAvatar(child: new Icon(Icons.music_note)),
+        title: new Text('音乐'),
+        onTap: () {
+          Navigator.of(context).push(
+              new MaterialPageRoute(builder: (context) => new MusicMainUI()));
         },
       ),
       new AboutListTile(

@@ -58,12 +58,16 @@ class SeekBar extends StatefulWidget {
   /// The function called when the value of the SeekBar changes.
   /// Passes the new value as a parameter.
   final void Function(double) onValueChanged;
+  final void Function() onValueChangedStart;
+  final void Function() onValueChangedEnd;
 
   SeekBar({
     Key key,
     @required this.height,
     @required this.width,
     this.onValueChanged,
+    this.onValueChangedStart,
+    this.onValueChangedEnd,
     this.max: 100,
     this.min: 0,
     this.radius,
@@ -79,7 +83,6 @@ class SeekBar extends StatefulWidget {
 }
 
 class _SeekBarState extends State<SeekBar> {
-  double _length;
   double radius;
   Widget seek;
   Widget bar;
@@ -90,17 +93,21 @@ class _SeekBarState extends State<SeekBar> {
     isHorizontal = widget.width > widget.height;
 
     radius = widget.radius ?? (isHorizontal ? widget.height : widget.width);
+  }
 
-    _length = isHorizontal ? widget.width : widget.height;
+  double getLength() {
+    return isHorizontal ? widget.width : widget.height;
   }
 
   double _convertLength(int value) {
-    return (widget.value - widget.min) * _length / (widget.max - widget.min) -
+    return (widget.value - widget.min) *
+            getLength() /
+            (widget.max - widget.min) -
         radius;
   }
 
   double _convertValue(double current) {
-    return (current + radius) * (widget.max - widget.min) / _length +
+    return (current + radius) * (widget.max - widget.min) / getLength() +
         widget.min;
   }
 
@@ -108,8 +115,8 @@ class _SeekBarState extends State<SeekBar> {
     setState(() {
       var _current = _convertLength(widget.value);
       var now = _current + delta;
-      if (now > _length - radius) {
-        now = _length - radius;
+      if (now > getLength() - radius) {
+        now = getLength() - radius;
       }
       if (now < -radius) {
         now = -radius;
@@ -126,7 +133,18 @@ class _SeekBarState extends State<SeekBar> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-//      onTapUp: _onTapUp,
+      onHorizontalDragStart: (tap) {
+        widget.onValueChangedStart();
+      },
+      onHorizontalDragEnd: (tap) {
+        widget.onValueChangedEnd();
+      },
+      onVerticalDragStart: (tap) {
+        widget.onValueChangedStart();
+      },
+      onVerticalDragEnd: (tap) {
+        widget.onValueChangedEnd();
+      },
       onHorizontalDragUpdate: (dragDetails) {
         if (!isHorizontal) {
           return;
@@ -157,16 +175,16 @@ class _SeekBarState extends State<SeekBar> {
   }
 
   _buildSeek() {
-    return widget.seek ??
-        new SizedBox(
-          width: 2 * radius,
-          height: 2 * radius,
-          child: new ClipOval(
+    return new SizedBox(
+      width: 2 * radius,
+      height: 2 * radius,
+      child: widget.seek ??
+          new ClipOval(
             child: new Container(
               color: Colors.red,
             ),
           ),
-        );
+    );
   }
 
   _buildBar() {
