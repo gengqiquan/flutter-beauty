@@ -52,6 +52,12 @@ flutter:
     - assets/ic_girl_header.jpeg
     - assets/ic_player.png
     - assets/beautiful.mp3
+    - assets/ic_needle.png
+    - assets/ic_last.png
+    - assets/ic_next.png
+    - assets/ic_pause.png
+    - assets/ic_play.png
+    - assets/ic_disc.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.
