@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:beauty/widgets/SeekBar.dart';
 import 'dart:ui';
+import 'package:dio/dio.dart';
 
 ///auther:gengqiquan
 ///date:2019/1/25
@@ -33,10 +34,13 @@ class _MusicDetailUIState extends State<MusicDetailUI>
   AnimationController swingController;
   CurvedAnimation swingCurved;
 
+  var showLrc = false;
+
   @override
   void initState() {
     super.initState();
-    info = _list[_index];
+    _scrollController = new ScrollController();
+
     AudioPlayer.logEnabled = true;
     audioPlayer = new AudioPlayer();
 
@@ -48,6 +52,7 @@ class _MusicDetailUIState extends State<MusicDetailUI>
         value = duration.inSeconds;
         angle += 25 / 360.0;
       });
+      scrollLrc(duration);
     };
     rotateController = new AnimationController(
         vsync: this,
@@ -72,16 +77,14 @@ class _MusicDetailUIState extends State<MusicDetailUI>
         animationBehavior: AnimationBehavior.preserve);
     swingCurved =
         new CurvedAnimation(parent: swingController, curve: Curves.linear);
-
-    audioPlayer.play(info["url"]);
     swingController.forward();
     rotateController.repeat();
+    play();
   }
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
+  void deactivate() {
+    super.deactivate();
     audioPlayer.stop();
     audioPlayer.release();
   }
@@ -180,18 +183,33 @@ class _MusicDetailUIState extends State<MusicDetailUI>
               child: new InkWell(
                 child: new Stack(
                   children: <Widget>[
-                    new Center(
+                    new Offstage(
+                      offstage: showLrc,
                       child: new Container(
-                        margin: EdgeInsets.all(40),
+                        margin: EdgeInsets.fromLTRB(30, 95, 30, 0),
                         child: AspectRatio(
                             aspectRatio: 1,
                             child: new RotationTransition(
                               turns: rotateCurved,
                               child: new Stack(
                                 children: <Widget>[
-                                  new Image.asset("assets/ic_disc.png"),
                                   new Container(
-                                      padding: EdgeInsets.all(47),
+                                    margin: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white10,
+                                      border: Border.all(
+                                          color: Colors.white54, width: 1),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(200)),
+                                    ),
+                                  ),
+                                  new Container(
+                                      padding: EdgeInsets.all(10),
+//                                      color: Colors.black,
+                                      child: new Image.asset(
+                                          "assets/ic_disc.png")),
+                                  new Container(
+                                      padding: EdgeInsets.all(57),
 //                                      color: Colors.black,
                                       child: new ClipOval(
                                         child: new Image.network(info["pic"]),
@@ -201,127 +219,144 @@ class _MusicDetailUIState extends State<MusicDetailUI>
                             )),
                       ),
                     ),
+                    new Container(
+                      padding: EdgeInsets.only(bottom: 130),
+                      child: new Offstage(
+                        offstage: !showLrc,
+                        child: buildLic(),
+                      ),
+                    ),
                   ],
                 ),
                 onTap: () {
-//                      if (audioPlayer.state == AudioPlayerState.PAUSED) {
-//                        audioPlayer.resume();
-//                      } else if (audioPlayer.state ==
-//                          AudioPlayerState.PLAYING) {
-//                        audioPlayer.pause();
-//                      }
-//                      controller.reverse();
+                  setState(() {
+                    showLrc = !showLrc;
+                  });
                 },
               ),
-            ),
-            new Container(
-                margin: EdgeInsets.all(15),
-                child: new SeekBar(
-                  height: 4,
-                  width: MediaQueryData.fromWindow(window).size.width - 30,
-                  max: info["time"],
-                  value: value,
-                  radius: 10,
-                  bar: new Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(2.0))),
-                  ),
-                  progress: new Container(
-                    decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.all(Radius.circular(2.0))),
-                  ),
-                  seek: new ClipOval(
-                    child: Container(
-                      color: Colors.white,
-                      child: new Center(
-                        child: new ClipOval(
-                          child: new Container(
-                            color: Colors.red,
-                            width: 4,
-                            height: 4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  onValueChanged: (index) {
-                    print(index.toString());
-                    setState(() {
-                      seek(index);
-                    });
-
-//                    audioPlayer.play(info["url"],
-//                        position: Duration(seconds: index.floor()));
-                  },
-                  onValueChangedStart: () {
-                    audioPlayer.pause();
-                  },
-                  onValueChangedEnd: () {
-                    audioPlayer.resume();
-                  },
-                )),
-            new Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                new InkWell(
-                  child: new Icon(
-                    Icons.arrow_left,
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                  onTap: () {
-                    last();
-                  },
-                ),
-                new InkWell(
-                  child: new Icon(
-                    !isPlaying ? Icons.play_circle_outline : Icons.pause,
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                  onTap: () {
-                    if (isPlaying) {
-                      pause();
-                    } else {
-                      replay();
-                    }
-                  },
-                ),
-                new InkWell(
-                  child: new Icon(
-                    Icons.arrow_right,
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                  onTap: () {
-                    next();
-                  },
-                ),
-              ],
-            ),
-            new Container(
-              height: 15,
             ),
           ],
         ),
         new Positioned(
+            bottom: 0,
+            right: 0,
+            left: 0,
+            child: new Column(children: <Widget>[
+              new Container(
+                  margin: EdgeInsets.all(15),
+                  child: new SeekBar(
+                    height: 4,
+                    width: MediaQueryData.fromWindow(window).size.width - 30,
+                    max: info["time"],
+                    value: value,
+                    radius: 10,
+                    bar: new Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(2.0))),
+                    ),
+                    progress: new Container(
+                      decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(2.0))),
+                    ),
+                    seek: new ClipOval(
+                      child: Container(
+                        color: Colors.white,
+                        child: new Center(
+                          child: new ClipOval(
+                            child: new Container(
+                              color: Colors.red,
+                              width: 4,
+                              height: 4,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    onValueChanged: (index) {
+                      print(index.toString());
+                      setState(() {
+                        seek(index);
+                      });
+
+//                    audioPlayer.play(info["url"],
+//                        position: Duration(seconds: index.floor()));
+                    },
+                    onValueChangedStart: () {
+                      audioPlayer.pause();
+                    },
+                    onValueChangedEnd: () {
+                      audioPlayer.resume();
+                    },
+                  )),
+              new Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Container(
+                    width: 50,
+                  ),
+                  new InkWell(
+                    child: new Image.asset(
+                      "assets/ic_last.png",
+                      color: Colors.white,
+                      width: 70,
+                      height: 70,
+                    ),
+                    onTap: () {
+                      last();
+                    },
+                  ),
+                  new InkWell(
+                    child: new Image.asset(
+                      isPlaying ? "assets/ic_pause.png" : "assets/ic_play.png",
+                      color: Colors.white,
+                      width: 70,
+                      height: 70,
+                    ),
+                    onTap: () {
+                      if (isPlaying) {
+                        pause();
+                      } else {
+                        replay();
+                      }
+                    },
+                  ),
+                  new InkWell(
+                    child: new Image.asset(
+                      "assets/ic_next.png",
+                      color: Colors.white,
+                      width: 70,
+                      height: 70,
+                    ),
+                    onTap: () {
+                      next();
+                    },
+                  ),
+                  Container(
+                    width: 50,
+                  ),
+                ],
+              )
+            ])),
+        new Positioned(
             top: MediaQueryData.fromWindow(window).padding.top + 33,
             left: MediaQueryData.fromWindow(window).size.width / 2 - 55,
-            child: new ClipRect(
-              clipper: _MyClipper(),
-              child: new RotationTransition(
-                alignment: Alignment(-0.378, -0.83),
-                turns: swingController,
-                child: new Image.asset(
-                  "assets/ic_needle.png",
-                  width: 170,
-                  height: 170,
-                ),
-              ),
-            ))
+            child: new Offstage(
+                offstage: showLrc,
+                child: new ClipRect(
+                  clipper: _MyClipper(),
+                  child: new RotationTransition(
+                    alignment: Alignment(-0.378, -0.83),
+                    turns: swingController,
+                    child: new Image.asset(
+                      "assets/ic_needle.png",
+                      width: 170,
+                      height: 170,
+                    ),
+                  ),
+                )))
       ],
     ));
   }
@@ -333,8 +368,7 @@ class _MusicDetailUIState extends State<MusicDetailUI>
         audioPlayer.stop();
         audioPlayer.release();
       }
-      info = _list[_index];
-      audioPlayer.play(info["url"]);
+      play();
     });
   }
 
@@ -346,13 +380,125 @@ class _MusicDetailUIState extends State<MusicDetailUI>
         audioPlayer.stop();
         audioPlayer.release();
       }
-      info = _list[_index];
-      audioPlayer.play(info["url"]);
+      play();
     });
+  }
+
+  play() {
+    info = _list[_index];
+    audioPlayer.play(info["url"]);
+    lrcUrl = info["lrc"];
+    lrcs.clear();
+    getHttp();
   }
 
   seek(double index) async {
     await audioPlayer.seek(new Duration(seconds: index.floor()));
+  }
+
+  List<Lrc> lrcs = new List<Lrc>();
+  String lrcUrl;
+  double _offset = 0;
+  ScrollController _scrollController;
+
+  final double _LRC_ITEM_HEIGHT = 30;
+
+  Widget buildLic() {
+    return SlideTransition(
+      child: ListView.builder(
+//      padding: EdgeInsets.only(top: baseLine>_offset?baseLine-_offset:0),
+          controller: _scrollController,
+          itemCount: lrcs.length,
+          itemBuilder: (context, index) {
+            return new Container(
+                height: _LRC_ITEM_HEIGHT,
+                child: new Text(
+                  lrcs[index].lrc,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: lastLine == index ? Colors.white : Colors.white30,
+                  ),
+                ));
+          }),
+    );
+  }
+
+  Future<Null> getHttp() async {
+    try {
+      Response response;
+      response = await new Dio()
+          .get(lrcUrl, options: new Options(responseType: ResponseType.PLAIN));
+      if (response.statusCode != 200) {
+        return print("response.statusCode" + response.statusCode.toString());
+      }
+      String data = response.data;
+//      print(response);
+      List<String> list = data.split("\n");
+      print(list);
+
+      setState(() {
+        list.forEach((item) {
+          List a = item.toString().split("\]");
+          if (a.length == 2 && a[1] != "") {
+            print(a);
+            List times = a[0].toString().replaceAll("[", "").split(":");
+
+            var s = double.parse(times[1]);
+            var d = Duration(
+                minutes: int.parse(times[0]),
+                seconds: s.floor(),
+                milliseconds: ((s % 1) * 1000).floor());
+            lrcs.add(new Lrc(a[1], d));
+          } else if (a[0].toString().startsWith("[by:")) {
+            lrcs.add(new Lrc(
+                a[0].toString().replaceAll("[", "").replaceAll("]", ""),
+                new Duration()));
+          }
+        });
+//        _scrollController.animateTo(300,
+//            duration: new Duration(milliseconds: 300), curve: Curves.ease);
+//        print(lrcs);
+      });
+    } catch (e) {
+      return print(e);
+    }
+  }
+
+  int lastLine = 0;
+  var baseLine = MediaQueryData.fromWindow(window).size.height / 3;
+
+  void scrollLrc(Duration duration) {
+    int p = duration.inMilliseconds;
+    var line = lrcs.lastIndexWhere((lrc) {
+      var time = lrc.duration.inMilliseconds;
+      return p > time;
+    });
+    print(p.toString() + ":" + lrcs[line].duration.inMilliseconds.toString());
+    if (line != lastLine) {
+      setState(() {
+        lastLine = line;
+        _offset = lastLine * _LRC_ITEM_HEIGHT;
+
+//        if (_offset > baseLine) {
+        _scrollController.animateTo(_offset,
+            duration: new Duration(milliseconds: 300), curve: Curves.ease);
+//        }
+      });
+    }
+  }
+}
+
+class Lrc {
+  final String lrc;
+
+  Lrc(this.lrc, this.duration);
+
+  final Duration duration;
+
+  @override
+  String toString() {
+    return 'Lrc{lrc: $lrc}';
   }
 }
 
