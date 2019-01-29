@@ -404,9 +404,8 @@ class _MusicDetailUIState extends State<MusicDetailUI>
   final double _LRC_ITEM_HEIGHT = 30;
 
   Widget buildLic() {
-    return SlideTransition(
-      child: ListView.builder(
-//      padding: EdgeInsets.only(top: baseLine>_offset?baseLine-_offset:0),
+    return ListView.builder(
+      padding: EdgeInsets.only(top: baseLine>_offset?baseLine-_offset:0),
           controller: _scrollController,
           itemCount: lrcs.length,
           itemBuilder: (context, index) {
@@ -420,7 +419,7 @@ class _MusicDetailUIState extends State<MusicDetailUI>
                     color: lastLine == index ? Colors.white : Colors.white30,
                   ),
                 ));
-          }),
+          },
     );
   }
 
@@ -480,10 +479,10 @@ class _MusicDetailUIState extends State<MusicDetailUI>
         lastLine = line;
         _offset = lastLine * _LRC_ITEM_HEIGHT;
 
-//        if (_offset > baseLine) {
-        _scrollController.animateTo(_offset,
+        if (_offset > baseLine) {
+        _scrollController.animateTo(_offset-baseLine,
             duration: new Duration(milliseconds: 300), curve: Curves.ease);
-//        }
+        }
       });
     }
   }
